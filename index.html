@@ -721,20 +721,18 @@ const VERIFIED_STATE = {"1": "have", "2": "have", "3": "have", "4": "have", "5":
 function initState() {
   let saved = null;
   try { saved = localStorage.getItem('adrenalyn_state'); } catch(e) {}
+
   if (saved) {
+    // Usuari ja té estat desat: té prioritat absoluta
     state = JSON.parse(saved);
+    // Afegeix claus noves que no existissin encara (NM, EL, EN, LT)
+    [...NEW_MASTERS, ...EDICION_LIMITADA, ...ENTRENADORS, ...LLETRES].forEach(it => {
+      if (!(it.k in state)) state[it.k] = VERIFIED_STATE[it.k] || 'missing';
+    });
+  } else {
+    // Primera vegada: carrega VERIFIED_STATE com a base
+    state = Object.assign({}, VERIFIED_STATE);
   }
-  // Always merge VERIFIED_STATE as base, then apply saved on top
-  const base = Object.assign({}, VERIFIED_STATE);
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    Object.assign(base, parsed);
-  }
-  state = base;
-  // Ensure all new section keys exist
-  [...NEW_MASTERS, ...EDICION_LIMITADA, ...ENTRENADORS, ...LLETRES].forEach(it => {
-    if (!(it.k in state)) state[it.k] = VERIFIED_STATE[it.k] || 'missing';
-  });
   saveState();
 }
 
